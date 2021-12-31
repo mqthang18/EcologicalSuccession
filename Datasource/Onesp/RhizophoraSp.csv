@@ -1,0 +1,15 @@
+﻿numstage,3,,
+,seeding,sapling,adult
+deathrates,0.64,0.6139,0.48
+growthrates,5,1.2,0
+reproducerates,0,0,0.032
+,,,
+dispersalradius,20,,
+radius (meters),0,1,2.2575
+,,,
+init,0,119,14
+effect,,,
+,0,0,0
+,0,0,0
+,0,0,0
+,0,0,0
