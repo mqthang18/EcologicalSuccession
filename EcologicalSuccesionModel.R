@@ -2,11 +2,6 @@ rm(list=ls())
 workDir = getwd()
 setwd(workDir)
 rm('workDir')
-# Core folder contain controller function and app function
-# App function is main program for flow processes
-# Controller function is a function to use for create route to database and call view template
-source("./Core/Controller.R")
-source("./Core/App.R")
 
 # Read Datafile ==================
 # Import essential library 
@@ -25,7 +20,11 @@ for (i in c(1:length(files))) {
 
 rm('name')
 
-
+# Call function ==========
+# Core folder contain controller function and app function
+# App function is main program for flow processes
+# Controller function is a function to use for create route to database and call view template
+source("./Core/App.R")
 # Create boundary map =================
 CreateBoundary(Habitat_stressor_info)
 
@@ -33,7 +32,7 @@ CreateBoundary(Habitat_stressor_info)
 shp = c('OriginArea', 'polyCoreDisturbedArea', 'polyDisturbedBoundaryArea')
 ShpPath = './Result/Intermediate/Map'
 
-source("./Model/CreateGridPolygon.R")
+
 if (file.exists(paste(ShpPath, 'Habitat', paste(shp[1], '.shp',sep=""), sep="/"))) {
   assign(shp[1], CreateGridPolygon(rgdal::readOGR(paste(ShpPath, 'Habitat', paste(shp[1], '.shp',sep=""), sep="/")), OTCdefine))
 }
@@ -43,34 +42,138 @@ if (file.exists(paste(ShpPath, 'Stressor', paste(shp[2], '.shp',sep=""), sep="/"
 if (file.exists(paste(ShpPath, 'Stressor', paste(shp[3], '.shp',sep=""), sep="/"))) {
   assign(shp[3], CreateGridPolygon(rgdal::readOGR(paste(ShpPath, 'Stressor', paste(shp[3], '.shp',sep=""), sep="/")), OTCdefine))
 }
-# Get Species data
+# Get Species data =========
 data = GetDataSp(DataSptable)
-# Export result
-R1 = RunModel(
-  OTCdefine = OTCdefine,
-  dataRaw = data, 
-  shp = shp, 
-  DataSptable = DataSptable, 
-  PeriodTime = c(0,6), 
-  species = 3, 
-  area = 1)
+# Export result ========
+# Vung rung con nguyen khong bi bao tac dong =================
+# R1_Rhizophora_1 = RunModel(
+#                           OTCdefine = OTCdefine,
+#                           dataRaw = data,
+#                           shp = shp,
+#                           DataSptable = DataSptable,
+#                           PeriodTime = NULL,
+#                           species = 1,
+#                           area = 1,
+#                           dispKernel = "random"
+#                           )
+# 
+# R1_Rhizophora_2 = RunModel(
+#                           OTCdefine = OTCdefine,
+#                           dataRaw = data,
+#                           shp=shp,
+#                           DataSptable = DataSptable,
+#                           PeriodTime = NULL,
+#                           species = 2,
+#                           area = 1,
+#                           dispKernel = "random"
+#                           )
+# R1_Rhizophora_3 = RunModel(
+#                             OTCdefine = OTCdefine,
+#                             dataRaw = data,
+#                             shp=shp,
+#                             DataSptable = DataSptable,
+#                             PeriodTime = NULL,
+#                             species = 3,
+#                             area = 1,
+#                             dispKernel = "random"
+#                           )
+# Vung bien, ranh gioi bao tac dong va vung nguyen ven ========================
+# R3_Rhizophora_1 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = 0,
+#                            species = 1,
+#                            area = 3,
+#                            dispKernel = 'random')
+# R3_Rhizophora_2 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 2,
+#                            area = 3,
+#                            dispKernel = 'random')
+# R3_Rhizophora_3 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 3,
+#                            area = 3,
+#                            dispKernel = 'random')
+# R3_Avicennia_4 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 4,
+#                            area = 3,
+#                            dispKernel = 'random')
+# R3_Avicennia_5 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 5,
+#                            area = 3,
+#                            dispKernel = 'random')
+# R3_Avicennia_6 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 6,
+#                            area = 3,
+#                            dispKernel = 'random')
+# Vung bi bao tac dong ===================
+# R2_Rhizophora_1 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = 0,
+#                            species = 1,
+#                            area = 2,
+#                            dispKernel = 'random')
+# R2_Rhizophora_2 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 2,
+#                            area = 2,
+#                            dispKernel = 'random')
+# R2_Rhizophora_3 = RunModel(OTCdefine = OTCdefine,
+#                            dataRaw = data,
+#                            shp=shp,
+#                            DataSptable = DataSptable,
+#                            PeriodTime = NULL,
+#                            species = 3,
+#                            area = 2,
+#                            dispKernel = 'random')
+# R2_Avicennia_4 = RunModel(OTCdefine = OTCdefine,
+#                           dataRaw = data,
+#                           shp=shp,
+#                           DataSptable = DataSptable,
+#                           PeriodTime = NULL,
+#                           species = 4,
+#                           area = 2,
+#                           dispKernel = 'random')
+# R2_Avicennia_5 = RunModel(OTCdefine = OTCdefine,
+#                           dataRaw = data,
+#                           shp=shp,
+#                           DataSptable = DataSptable,
+#                           PeriodTime = NULL,
+#                           species = 5,
+#                           area = 2,
+#                           dispKernel = 'random')
+# R2_Avicennia_6 = RunModel(OTCdefine = OTCdefine,
+#                           dataRaw = data,
+#                           shp=shp,
+#                           DataSptable = DataSptable,
+#                           PeriodTime = NULL,
+#                           species = 6,
+#                           area = 2,
+#                           dispKernel = 'random')
+# rm(ls())
 
-R2 = RunModel(
-              OTCdefine = OTCdefine, 
-              dataRaw = data, 
-              shp=shp, 
-              DataSptable = DataSptable, 
-              PeriodTime = NULL, 
-              species = 2, 
-              area = 1
-              )
-R3 = RunModel(OTCdefine = OTCdefine, 
-              dataRaw = data, 
-              shp=shp, 
-              DataSptable = DataSptable, 
-              PeriodTime = NULL, 
-              species = 1, 
-              area = 1
-              )
-
-rm(ls())

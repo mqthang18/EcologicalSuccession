@@ -1,8 +1,3 @@
-# call function from ModelForOnesp Or ModelForTwoSp in the Model folder ============
-source("./Model/GetDataSp.R")
-
-source("./Core/Controller.R")
-
 # names = names(data)
 
 RunModel = function(
@@ -11,16 +6,21 @@ RunModel = function(
                     dataRaw, # Du lieu sinh ly cho tung vung
                     shp, # ten cua 3 bien luu du lieu polygon
                     DataSptable, # xac dinh du lieu su dung 
-                    PeriodTime = NULL, # Xac dinh khoang thoi gian mong muon
+                    PeriodTime = NULL, # Xac dinh khoang thoi gian (beginTime; EndTime) mong muon hoac bo trong
                     species, # giai doan loai
-                    area # chon khu vuc theo chi so cua bien shp
+                    area, # chon khu vuc theo chi so cua bien shp
+                    dispKernel # chon kieu khuech tan hat 
                     ){
 
+    pop <- c()
+    total <- c()
+    stages <- c()
+  
     id <- c()
     sp <- c()
     beginT <- c()
     endT <- c()
-    
+    longevity <- c()
     PointX <- c()
     PointY <- c()
     
@@ -37,7 +37,9 @@ RunModel = function(
           index <- c()
           i1 <- c()
           i2 <- c()
+          longe <- c()
           dataR <- c()
+          indexID <- c()
           if (length(j) == 1) {
             # next
             minX <- min(j[[1]][,1])
@@ -63,7 +65,8 @@ RunModel = function(
             DataSptable$Number_sp[area],
             DataSptable$Area[area],
             OTCdefine,
-            dataRaw
+            dataRaw,
+            dispKernel = dispKernel
           )
 
           # dataR <- facilitation::restart(data=Result$data,
@@ -71,50 +74,88 @@ RunModel = function(
           #                                start=0)
             # dataR <- facilitation::restart(Result,10,start=0)
             # dataR <- dataR$data
-          dataR <- Result$data
-          if (is.null(PeriodTime)) {
-            # index <- which(is.na(dataR$endtime) & (dataR$sp == species))
-            index <- which(dataR$sp == species)
-            # print('=====')
-            # print(index)
+          # dataR <- Result$data
+          dataR <- facilitation::longevity(Result)
+          # print(dataR)
+          if (!is.null(species)) {
+            if (is.null(PeriodTime)) {
+              index <- which(dataR$last.stage == species)
+            } else {
+                if (length(PeriodTime) != 1) {
+                  index <- which((dataR$birth >= PeriodTime[1] & dataR$birth <= PeriodTime[2]) & dataR$death >= PeriodTime[2] & dataR$last.stage == species)
+                
+              } else {
+                  index <- which((dataR$birth <= PeriodTime & dataR$death >= PeriodTime) & dataR$last.stage == species)
+              }
+            }
           } else {
-            # i1 <- which(dataR$begintime >= PeriodTime[1] & dataR$endtime <= PeriodTime[2])
-            # i2 <- which(dataR$sp == species)
-            # index = intersect(i1,i2)
-            index <- which(dataR$begintime >= PeriodTime[1] & dataR$endtime <= PeriodTime[2] & dataR$sp == species)
-            # index <- c(1:length(dataR$sp))
-            # print(index)
-          }
-
+            if (is.null(PeriodTime)) {
+              index <- which(!is.null(dataR$last.stage))
+            } else {
+                if (length(PeriodTime) != 1) {
+                  index <- which((dataR$birth >= PeriodTime[1] & dataR$birth <= PeriodTime[2]) & dataR$death >= PeriodTime[2] & !is.null(dataR$last.stage))
+                  
+                } else {
+                  index <- which((dataR$birth <= PeriodTime & dataR$death >= PeriodTime) & !is.null(dataR$last.stage))
+                }
+              }
+            }
+          
           if (length(index) == 0) {
             next
           } else {
-            id <- c(id, dataR[index,2])
+            # longe <- facilitation::longevity(Result)
+            indexID = dataR[index,2]
+            # print(longevity)
+            id <- c(id, indexID)
             sp <- c(sp, dataR[index,1])
-            beginT <- c(beginT, dataR[index,5])
-            endT <- c(endT, dataR[index,6])
-
+            beginT <- c(beginT, dataR[index,3])
+            endT <- c(endT, dataR[index,4])
+            longevity <- c(longevity, dataR[index,5])
+            
+            
+            dataR = Result$data
+            index = which((indexID %in% dataR$id)==T)
             Long <- dataR[index,3] + minX
             Lat <- dataR[index,4] + minY
-
+            
+            
             PointX <- c(PointX, Long)
             PointY <- c(PointY, Lat)
+          
+            
           }
+          pop <- Result$num.pop
+          total <- Result$num.total
+          stages <- Result$num.stages
         }
-      print('Successful')
+      
       # print(i)
       # print(Result)
       
-      coorPoint <- data.frame(x=PointX, y=PointY)
-      dataG <- data.frame(ID=id, sp=sp, beginTime=beginT, endTime=endT)
-      coorPoint <- sp::SpatialPointsDataFrame(coorPoint, dataG)
-
-      rgdal::writeOGR(coorPoint,
-                      dsn = "./Result/Intermediate/Output",
-                      layer= paste(shp[area],'sp',species,sep="_"),
-                      driver = "ESRI Shapefile",
-                      overwrite_layer=T)
-      return(dataG)
+      
+      dataG <- data.frame(ID=as.integer(id), 
+                          sp=as.integer(sp), 
+                          begintime=beginT, 
+                          endtime=endT, 
+                          longevity = longevity)
+      
+      print(paste(paste('num.pop',pop,sep=": "),
+                  paste('num.total',total,sep=": "),
+                  paste('num.stages',stages,sep=": "), sep="; "))
+      if (length(dataG) == 0) {
+        print("Don't have result for this condition")
+      } else {
+        print("Successful!")
+        coorPoint <- data.frame(x=PointX, y=PointY)
+        coorPoint <- sp::SpatialPointsDataFrame(coorPoint, dataG)
+        rgdal::writeOGR(coorPoint,
+                        dsn = "./Result/Output",
+                        layer= paste(shp[area],'sp',species,sep="_"),
+                        driver = "ESRI Shapefile",
+                        overwrite_layer=T)
+        # return(dataG)
+      }
 }
 
 

@@ -1,4 +1,4 @@
-singleModel <- function(data, OTC) {
+singleModel <- function(data, OTC, dispKernel = "random") {
   # require("facilitation")
   
   numstages <- as.integer(data$B[1])
@@ -26,7 +26,8 @@ singleModel <- function(data, OTC) {
                                         param,
                                         init,
                                         interactionsD=effects,
-                                        height=h,width=w
+                                        height=h,width=w,
+                                        dispKernel = dispKernel
                                         )
   
   return(OriginArea)

@@ -1,4 +1,4 @@
-MultipleModel = function(data, OTC) {
+MultipleModel = function(data, OTC, dispKernel) {
   # require("facilitation")
   ### Two species competition+facilitation
   # maxt <- as.numeric(OTC$Number[1])
@@ -32,7 +32,8 @@ MultipleModel = function(data, OTC) {
     facilitation::community(maxt,nstages,param,init, 
               interactionsD=interactD,
               interactionsG=interactG,
-              height = height, width = width
+              height = height, width = width,
+              dispKernel = dispKernel
     )
   return(results)
 }
