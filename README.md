@@ -6,4 +6,4 @@ Các đường dẫn trong đây được dùng ở dạng đường dẫn tươ
 Dữ liệu được lưu trữ trong thư mục Datasource 
 
 # Export Result
-Kết quả mô hình lưu tại thư mục "Result/Intermediate/Output" 
+Kết quả mô hình lưu tại thư mục "Result/Output" 
