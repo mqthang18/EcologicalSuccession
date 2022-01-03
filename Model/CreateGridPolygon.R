@@ -10,7 +10,7 @@ CreateGridPolygon = function(shp, OTC) {
   }
   shp <- st_as_sf(shp)
   grid <- shp %>% 
-    st_make_grid(cellsize = size, what = "polygons") %>% # grid of points
+    st_make_grid(cellsize = size, what = "polygons") %>% # grid of polygons
     st_intersection(shp)                               # only within the polygon
   return(grid)
 }
